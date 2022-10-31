@@ -1,0 +1,298 @@
+---
+title: "Lab 4: Avocat d'avocat"
+author: "Cameron White"
+format:
+  html:
+    code-fold: true
+    code-summary: "show code"
+editor: visual
+---
+
+#### Setup
+
+```{r}
+#| output: false
+
+library(tidyverse)
+library(tibble)
+library(here)
+library(janitor)
+
+avo <- tibble(read_csv(
+  here::here("supporting_artifacts", 
+  "Labs", "Lab 4", "avocado.csv")))
+```
+
+###### The dataset contains information about the sale of avocados. It includes the region, the type of avocado, and the amount sold in three different volumes that add up to the cumulative total for a given day and region.
+
+#### Introduction and Setup: Cleaning the Data
+
+```{r}
+avo <- avo |> 
+  clean_names()
+
+all <- tibble(
+  region = 
+    c(unique(
+      avo$region)))
+
+regions <- tibble(region = c(
+  "GreatLakes",
+  "Midsouth",
+  "Northeast",
+  "NorthernNewEngland",
+  "Plains",
+  "Southeast",
+  "SouthCentral",
+  "West",
+  "WestTexNewMexico"))
+  
+states <- tibble(region = c("California","NewYork", "SouthCarolina"))
+  
+total <- tibble(region = "TotalUS")
+
+metro <- all |> 
+  anti_join(regions) |> 
+  anti_join(states) |> 
+  anti_join(total)
+```
+
+#### Cleaning 2.0
+
+```{r}
+metro_data <- avo |> 
+  semi_join(metro)
+
+state_data <- avo |> 
+  semi_join(states)
+
+regions_data <- avo |> 
+  semi_join(regions)
+
+total_data <- avo |> 
+  semi_join(total)
+```
+
+#### Exercises #3
+
+```{r}
+regions_organic <- regions_data |> 
+  filter(type == "organic",
+         year == 2017) |> 
+  group_by(region) |> 
+  summarize(sold = sum(x4046))
+```
+
+###### The 'West' region sold the most organic, small Hass avocados in 2017 (1870206).
+
+#### Exercise #4
+
+```{r}
+metro_2017_hass <- metro_data |> 
+  separate(
+    col = "date", 
+    into = c(
+      "Year", "Month", "Day"), 
+    sep = '-')
+
+month_top_vol <- metro_2017_hass |> 
+  group_by(Month) |> 
+  summarize(
+    sum_total = sum(total_volume))
+```
+
+###### The greatest volume of avocado sales happen during January.
+
+#### Exercise #5
+
+```{r}
+metro_area_region <- metro_data |> 
+  group_by(region) |> 
+  summarize(average = mean(total_volume)) |> 
+  arrange(desc(average)) |>
+  slice(1:5) |> 
+  select(region)
+
+metro_top5 <-  metro_data |> 
+  semi_join(metro_area_region)
+
+metro_top5 |>  
+  ggplot(mapping = aes(
+    x = region, 
+    y = total_volume,
+    fill = region)) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Metropolitan Area",
+    y = "Total Volume Sold") +
+  ggtitle(
+    "Top 5 Metropolitan Areas Ranked
+    By Volume of Avocado Sales") +
+  geom_jitter(
+    color = "brown",
+    width = 0.3)+
+  geom_boxplot(
+    width = 0.3)
+ 
+```
+
+###### The top 5 metropolitan areas ranked by avocado sales are: Los Angeles, DallasFtWorth, Houston, Phoenix, and Denver.
+
+#### Reshaping: Just California
+
+```{r}
+westcoastbestcoast <- tibble(
+  region = c(
+    "LosAngeles", 
+    "SanDiego", 
+    "Sacramento", 
+    "SanFrancisco"))
+
+cali_data <- metro_data |> 
+  semi_join(westcoastbestcoast)
+```
+
+#### Exercise #6
+
+```{r}
+price_median <- cali_data |> 
+  group_by(
+    region, type) |> 
+  summarize(
+    median_price = 
+      median(average_price)) |> 
+  pivot_wider(
+    names_from = type, 
+    values_from = median_price) |> 
+  mutate(
+    diff_price = organic - conventional) |> 
+  rename(
+    organic_price = organic,
+    conventional_price = conventional)
+
+price_median |> 
+  ggplot(mapping = aes( 
+         x = fct_reorder(
+           region, diff_price),
+         y = diff_price,
+         fill = region)) +
+  geom_col(
+    width = 0.5) + 
+  labs(x= "CA Metro", 
+       y = "Median Organic/Conventional Price Difference($)") +
+  theme(legend.position = "none") +
+  ggtitle("Comparing Organic and Conventional Avocado Prices")
+```
+
+###### After transforming the dataset and deriving the median price of organic and conventional avocados for each region, it became clear that, *perhaps* due to location and income/cost of living certain CA metro areas have significantly different avocado prices, both comparing across region as well as within a region. I was surprised that San Diego has higher prices than Los Angeles; there is a strong history of avocado farming in San Diego and the city is closer to suppliers from Mexico. But maybe the produce from Mexico is shipped into the port of LA and then driven to SD?
+
+#### Exercise #7 Setup for Organic
+
+```{r}
+
+type_join <- tibble(type = "conventional")
+
+hass_org <- cali_data |> 
+  anti_join(type_join)
+
+avonames <- c("Small", "Large", "Extra_Large")
+
+mean_hass_org <- hass_org |> 
+  group_by(region, type) |> 
+  summarize(
+    across(
+      c("x4046", 
+        "x4225", 
+        "x4770"), 
+      ~mean(.)))|>
+  rename(Small = x4046,
+         Large = x4225,
+         Extra_Large = x4770) |> 
+  pivot_longer(
+    avonames, 
+    names_to = "size", 
+    values_to = "volume")
+
+total_mean_org <- mean_hass_org |> 
+  group_by(region) |> 
+  summarize(sum(volume)) |> 
+  rename("total_volume" = "sum(volume)")
+
+mean_hass_org <- left_join(mean_hass_org, total_mean_org, by = "region") 
+
+mean_hass_org <- mean_hass_org |> 
+  mutate(proportion = volume / total_volume)
+
+mean_hass_org$proportion <- 
+  mean_hass_org$proportion |> 
+  round(3)
+```
+
+#### Exercise #7 Setup for Conventional
+
+```{r}
+
+hass_con <- cali_data |> 
+  semi_join(type_join)
+
+mean_hass_con <- hass_con |> 
+  group_by(region, type) |> 
+  summarize(
+    across(
+      c("x4046", 
+        "x4225", 
+        "x4770"), 
+      ~mean(.)))|>
+  rename(Small = x4046,
+         Large = x4225,
+         Extra_Large = x4770) |> 
+  pivot_longer(
+    avonames, 
+    names_to = "size", 
+    values_to = "volume")
+
+total_mean_con <- mean_hass_con |> 
+  group_by(region) |> 
+  summarize(sum(volume)) |> 
+  rename("total_volume" = "sum(volume)")
+
+mean_hass_con <- left_join(mean_hass_con, total_mean_con, by = "region") 
+
+mean_hass_con <- mean_hass_con |> 
+  mutate(proportion = volume / total_volume)
+
+mean_hass_con$proportion <- 
+  mean_hass_con$proportion |> 
+  round(3)
+
+
+```
+
+#### Exercise #7 Plotting
+
+```{r}
+#| layout: [50:50]
+
+mean_hass_org |> 
+ggplot(mapping = aes(
+  x = region,
+  y = proportion, 
+  fill = size)) +
+  labs(x = "Region of CA",
+       y = "Proportion of Mean Avocados Sold") +
+  geom_col(data = mean_hass_org) +
+  geom_col(data = mean_hass_con)+
+  scale_fill_discrete(
+    limits = c("Small", "Large", "Extra_Large"), 
+    name = "Avocado Size")
+
+mean_hass_con |> 
+  ggplot(mapping = aes(
+  x = region,
+  y = proportion,
+  fill = size)) +
+  labs(x = "Region of CA",
+       y = "Proportion of Mean Avocados Sold") +
+  geom_col() +
+  scale_fill_discrete(name = "Avocado Size")
+```

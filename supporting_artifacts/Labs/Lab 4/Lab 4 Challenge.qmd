@@ -1,0 +1,119 @@
+---
+title: "Lab 4 Challenge"
+author: "Cameron White"
+format: html
+editor: visual
+---
+
+#### Setup
+
+```{r}
+#| output: false
+
+library(tidyverse)
+library(tibble)
+library(here)
+library(janitor)
+
+avo <- tibble(read_csv(
+  here::here("supporting_artifacts", 
+  "Labs", "Lab 4", "avocado.csv")))
+```
+
+#### Introduction and Setup: Cleaning the Data
+
+```{r}
+avo <- avo |> 
+  clean_names()
+
+all <- tibble(
+  region = 
+    c(unique(
+      avo$region)))
+
+regions <- tibble(region = c(
+  "GreatLakes",
+  "Midsouth",
+  "Northeast",
+  "NorthernNewEngland",
+  "Plains",
+  "Southeast",
+  "SouthCentral",
+  "West",
+  "WestTexNewMexico"))
+  
+states <- tibble(region = c("California","NewYork", "SouthCarolina"))
+  
+total <- tibble(region = "TotalUS")
+
+metro <- all |> 
+  anti_join(regions) |> 
+  anti_join(states) |> 
+  anti_join(total)
+```
+
+#### Reshaping: Just California
+
+```{r}
+metro_data <- avo |> 
+  semi_join(metro)
+
+westcoastbestcoast <- tibble(
+  region = c(
+    "LosAngeles", 
+    "SanDiego", 
+    "Sacramento", 
+    "SanFrancisco"))
+
+cali_data <- metro_data |> 
+  semi_join(westcoastbestcoast)
+```
+
+#### Creating house price data, joining
+
+```{r}
+cali_avo_prices <- cali_data |> 
+  group_by(region) |> 
+  summarize(avg_avg_price = mean(average_price))
+
+house_price <- 
+  tibble(
+    region = c(
+      "LosAngeles", 
+      "SanDiego", 
+      "Sacramento", 
+      "SanFrancisco"), 
+  median_house_price = c(
+    1000000, 900000, 485000, 1635000))
+
+cali_avo_house_prices <- cali_avo_prices |> 
+  inner_join(house_price, by = "region")
+
+
+```
+
+#### Plotting it!
+
+```{r}
+plot <- cali_avo_house_prices |> 
+  ggplot(mapping = aes(
+  x = avg_avg_price,
+  y = median_house_price, 
+  color = region)) +
+  labs(
+    x = "Average Avocado Price",
+    y = "Median House Price"
+  ) +
+  theme(legend.position = "none") +
+  geom_point()
+  
+plot +
+  annotate("text", x = 1.25, y = 1100000, label = "Los Angeles") +
+  annotate("text", x = 1.4, y = 980000, label = "San Diego")+
+  annotate("text", x = 1.63, y = 570000, label = "Sacramento") +
+  annotate("text", x = 1.74, y = 1570000, label = "San Francisco")
+```
+
+###### Strangely enough, there seems to be a distinct pattern in the data for 3 out of the 4 metro regions. Excluding San Francisco, there is a negative correlation between average avocado prices and median house prices. A very shallow interpretation of the data would suggest that house prices in Sacramento are depressed due to the local population's addiction to purchasing many bushels of relatively over-priced avocados, leading to their fiscal demise. It would seem then that millennials are indeed unable to purchase more expensive houses because they're too distracted by avocados.
+
+###### A more likely explanation would be that Sacramento is simply not as desirable to live compared to the other cities, and that is why the prices are different. And that while avocado toast is more expensive than butter toast, it isn't avocados that tank millenial finances but rather continued wage stagnation in the face of modern challenges such as: '08 Recession, COVID, population growth, housing shortages, food price stress from climate change and rising wages in developing countries, and increased avenues for luxury consumption that did not exist in years past (i.e. social media and the internet in general influencing our spending habits and making consumption available 24/7).
