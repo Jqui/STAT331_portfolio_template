@@ -1,0 +1,93 @@
+---
+title: "Lab2Challenge"
+author: "Cameron White"
+format:
+  html: 
+    code-fold: true
+    code-summary: "show code"
+editor: visual
+execute: 
+  error: true
+  echo: true
+---
+
+#### Setup
+
+```{r}
+#| output: false
+library(tidyverse)
+library(here)
+library(ggplot2)
+```
+
+#### Read in data
+
+```{r}
+#| output: false
+surveys <- read_csv(
+  here::here("supporting_artifacts", "Labs", "Lab 2", "surveys.csv"))
+```
+
+#### Data Processing
+
+```{r}
+spec_names <- surveys$species %>% 
+  unique() %>% 
+  sort()
+
+gen <- vector(mode = "character", 
+                length(spec_names))
+
+for (i in seq_along(spec_names)) {
+  gen[i] <- unique(
+    surveys$genus[
+      surveys$species == spec_names[i]])
+}
+
+
+spec_gen <- tibble(
+  species = spec_names,
+  genus = gen)
+```
+
+#### Plotting
+
+```{r}
+plot <- surveys %>% 
+  ggplot(
+  mapping = aes(
+    x = weight,
+    y = species,
+    fill = genus)) +
+  theme(legend.position = "none") +
+  labs(x = "Weight(g)") +
+  labs(y = "Species") +
+  expand_limits(x = c(0, 380)) +
+  geom_jitter(color = "tomato") +
+  geom_boxplot(outlier.shape = NA) +
+  ggtitle(
+    "Weight(g) of Rodents by 
+    \n   Species and Genus") +
+  theme(
+    plot.title=element_text(
+      family='', 
+      face='bold', 
+      colour='black', 
+      size=20),
+    plot.title.position = "panel"
+  )
+```
+
+#### Adding annotations to plot
+
+```{r}
+for (i in seq_along(gen)){
+  plot <- plaut +
+    geom_text(x = 330, 
+              y = i, 
+              label = paste(gen[i]), 
+              colour = "black"
+              )
+}
+plot
+```
