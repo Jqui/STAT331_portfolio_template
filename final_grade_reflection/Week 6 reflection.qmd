@@ -1,0 +1,28 @@
+---
+title: "Week 6 Reflection"
+author: "Cameron White"
+format: html
+editor: visual
+---
+
+## 
+
+#### Week 6 Reflection
+
+  In stark contrast with my week 3 reflection, I do not think I’ve been doing a good job of accomplishing my personal goals in full, but I have been more present in being part of the Stat 331/531 classroom.  My attendance continues to be quite good, I believe I only missed one class so far.  And I always do try during the Practice Activities on Tuesdays.  On the flip side, I haven’t really kept up with the coursework much in terms of turning it in.  I am still definitely learning and completely a large amount of the work each week, just not to the full extent that would make it acceptable.  
+
+
+  Take for instance Lab 4.  I’ve had that lab finished ~95% of the way for about 1.5 weeks now and worked through it using all of the required functions (as far as I can tell).  The last bit of it, getting the avocado graphs to properly align has been continually pushed off.  However, I did learn most of what we were intended to for it, as far as I can tell.  There are, without a doubt, areas in my code that need to be improved.  But I did most of it. 
+
+
+  In more specific terms I believe I have achieved a number of Learning Targets. WD-2 has been satisfied by Lab 3 in which I used the select() function in conjunction with the group_by() function many times.   WD-4 has been satisfied by lab 3 in which I used the mutate() function to create variables in a dataframe using if_else statements, changing variables into factors, into numeric, etc. WD-5 has been satisfied by Lab 4 in which I used the left_join, anti_join(), and semi_join() functions on various dataframes in order to combine/extract/reshape data depending on the analysis.  WD-6 has been satisfied by Lab 3 with the filter() function to find Justin Bieber.  
+
+  R-1 has been satisfied with Challenge 4 in which I used the here package, logical object names, clear section headers, tidy code, and explanatory text to create a professional looking and reproducible analysis. R-2 has been satisfied by Challenge 4 in which I took care to write well-documented and tidy code. R-3 has been satisfied by Lab 3 in which I used the select() function to select columns by their variable name instead of their relative position in the dataframe.
+
+  DVS-1 has been satisfied by Lab 4 in which I created multiple different ggplots analyzing the dataset in many different ways. DVS-2 has been satisfied by Lab 4 in which I changed the width of columns, the color of the data, and implemented geom_jitter to make the visualization clear. DVS-3 was satisfied by Challenge 2 in which I used many optional ggplot functions to change the shape of the graph, the title, and the color of the boxplots. DSV-4 was satisfied by Lab 4 in which I used the summarize() function many times on numerical variables. DSV-5 was satisfied by Lab 4 in which I summarized across multiple variables multiple times in order to distill avocado data into comprehensible data frames.
+
+  PE-1 was satisfied by Lab 3 in which the code is concise and does not repeat itself, I used mutate() in conjunction with across() in order to condense my code. PE-2 was satisfied by Lab 3 in the same way. PE-3 was satisfied by Challenge 2 in which I iteratively added annotations to my ggplot. PE-4 has been satisfied by Lab 3 in which I made great use of functions like: mutate(), group_by(), across(), ggplot, and slice().
+
+  I have had a hard time keeping up with reading all of the material prior to Tuesday's class, though I do try to at the very least watch the videos. And, clearly, I have not been keeping up with the preview activities. I think I need to rely more on discord and my labmates to help get myself through the last bits of labs and activities rather than run up against them for long amounts of time or decide there isn't enough time.
+
+  In summation, I believe I am not entirely accomplishing what I set out to do in class. I am still learning R each week, but I am not learning it as deeply as I was weeks 1-4 and am not keeping up week to week with the smaller things that then help with keeping up with the larger. I would say my grade is probably either a between an F+ and a D at the moment.
