@@ -1,0 +1,379 @@
+---
+title: "Lab 3: Gettin' Hippy wit it"
+author: "Cameron White"
+format:
+  html:
+    code-fold: true
+    code-summary: "show code"
+editor: visual
+---
+
+#### Overview of 'hiphop' dataset
+
+###### **1.** The dataset is from research that attempted to link a person's musical tastes to familiarity with African-American English (AAE). It controlled for ethnicity, social network, and general pop-culture knowledge. It was conducted at the University of Minnesota and had 168 participants from the Linguistics, Sociology, and Music departments. Of the 168 subjects, two were African-American and ommitted from the study. From "open-response" questions, the data was coded to a categorical five-point scale that described the familiarity of the subjects with each AAVE word.
+
+#### Setup
+
+```{r}
+#| output: false
+library(tidyverse)
+library(here)
+#library(naniar)
+```
+
+#### Data Basics
+
+```{r}
+#| output: false
+hip <- read_csv(
+  here::here("supporting_artifacts", 
+    "Labs", 
+    "Lab 3", 
+    "hiphop.csv"))
+```
+
+###### 2. The rows of the dataset are the AAVE words that were given to the subjects. Each row is a unique combination of a subject and a word. As a result there are a very large number of rows, equal to the number of chosen AAVE words and the number of participants multiplied together. Each record includes includes the demographic data unique to the participant in question, as well as their musical likes/dislikes, familiarity with the word,
+
+###### 3. The missing values were in the social network variables were replaced by mean values. This is beneficial because adding the mean value won't impact a major summary statistic, the mean. On the other hand it likely over or underestimated the true value. It also is an issue that it introduces non-integer values into a column that is counting people.
+
+###### There also seems to be missing population data for 6 indivduals in the 'county' and 'city' columns that has been substituted with zeroes.
+
+#### Cleaning the Dataset (failed)
+
+```{r}
+hop <- tibble(hip)
+
+#colnames(hop)
+
+#hop_move <- hop |> 
+  #select(asianMove : whiteMove) |> 
+  #floor()
+
+#hop_new <- hop |> 
+  #select(-asianMove:-whiteMove)
+
+#biggie <- merge(hop_new, hop_move)
+
+#Didn't work, the merge function was a huge memory hog and used up all 32gb of my RAM. 
+```
+
+#### 
+
+#### Clean the Data: Rounding down values
+
+```{r}
+# hop$asianMove <- hop$asianMove |> 
+#   floor()
+# hop$blackMove <- hop$blackMove |> 
+#   floor()
+# hop$hispanicMove <- hop$hispanicMove |> 
+#   floor()
+# hop$nativeMove <- hop$nativeMove |> 
+#   floor()
+# hop$SAAMEMove <- hop$SAAMEMove |> 
+#   floor()
+# hop$whiteMove <- hop$whiteMove |> 
+#   floor()
+
+#revised code: 
+
+hop <- hop |> 
+  mutate(
+    across(asianMove:whiteMove, ~floor(.)))
+```
+
+#### Cleaning the Dataset vol. 3 (failed)
+
+```{r}
+#| output: false
+# hop |> 
+#   replace_with_na((
+#     replace = list(
+#       city = 0,
+#     county = 0)))
+```
+
+#### Counting
+
+```{r}
+count <- unique(hop$word)
+
+#revised code:
+count2 <- hop |> 
+  distinct(word) |> 
+  select(word)
+```
+
+###### 5. There are 64 unique AAE words that were studied in the dataset.
+
+#### Ethnicity
+
+```{r}
+
+hop <- hop |> 
+  mutate(
+    ethnic_dicot = 
+      ifelse(ethnic != "white", 
+      "non-white", "white"))
+```
+
+#### Demographics (and some more cleaning)
+
+```{r}
+
+hop_demo <- hop |> 
+  distinct(
+    subj, sex, 
+    .keep_all = TRUE) |> 
+  select(
+    subj, 
+    sex, 
+    ethnic, 
+    ethnic_dicot, 
+    age)
+
+# hop_demo$sex <- as.factor(
+#   hop_demo$sex)
+# 
+# hop_demo$ethnic <- as.factor(
+#   hop_demo$ethnic)
+# 
+# hop_demo$ethnic_dicot <- as.factor(
+#   hop_demo$ethnic_dicot)
+
+
+#revised code:
+hop_demo <- hop_demo |> 
+  mutate(
+    across(c("sex", "ethnic", "ethnic_dicot"), ~as.factor(.)))
+
+summary(hop_demo)
+```
+
+###### Paring the dataset down to the demographic variables shows that the population sample has larger concentrations of certain indivduals. There are about twice as many female students than male, and 80% of the sample are white. Unurprisingly, the ages closely follow usual college student ages of 18-22, though there are outliers at 16 and 48.
+
+#### Plotting
+
+```{r}
+demo_ethnic_age <- hop_demo |> 
+  group_by(ethnic) |> 
+  summarize(
+    median_age = median(age))
+
+demo_ethnic_age %>% 
+  ggplot(mapping = aes(
+    x = fct_reorder(
+      ethnic, median_age),
+    y = median_age,
+    size = 5)) +
+  theme(legend.position = "none") +
+  labs(x = "Ethnicity") +
+  labs(y = "Median Age") +
+  ggtitle("Ethnicity and Age") +
+  theme(
+    plot.title=element_text(
+      family='', 
+      face='bold', 
+      colour='black', 
+      size=20),
+    plot.title.position = "panel") +
+  geom_point(color = "darkturquoise")
+
+
+```
+
+```{r}
+hop_demo %>% 
+  ggplot(mapping = aes(
+    x = fct_reorder(
+      ethnic, age),
+    y = age)) +
+  theme(legend.position = "none") +
+  labs(x = "Ethnicity") +
+  labs(y = "Age") +
+  ggtitle("Ethnicity and Age") +
+  theme(
+    plot.title=element_text(
+      family='', 
+      face='bold', 
+      colour='black', 
+      size=20),
+    plot.title.position = "panel") +
+  geom_jitter(color = "darkturquoise") +
+  geom_boxplot(
+    outlier.shape = NA, 
+    width = 0.4)
+
+
+```
+
+```{r}
+
+hop_demo %>% 
+  ggplot(mapping = aes(
+    x = ethnic_dicot,
+    y = age)) +
+  theme(legend.position = "none") +
+  labs(x = "Ethnicity") +
+  labs(y = "Age") +
+  ggtitle("Ethnicity and Age") +
+  theme(
+    plot.title=element_text(
+      family='', 
+      face='bold', 
+      colour='black', 
+      size=20),
+    plot.title.position = "panel") +
+  geom_jitter(
+    color = "darkturquoise", 
+    width = 0.15) +
+  geom_boxplot(
+    outlier.shape = NA, 
+    width = 0.1)
+```
+
+#### Young Age Familiarity
+
+```{r}
+#| output: false
+
+YB <- hop |> 
+  filter(age<20) |> 
+  distinct(subj)
+
+hop |> 
+  filter(age<20) |> 
+  select(word, familiarity) |> 
+  group_by(word) |> 
+  summarize(fam = median(familiarity)) |> 
+  slice_max(order_by = fam)
+
+hop |> 
+  filter(age<20) |> 
+  select(word, familiarity) |> 
+  group_by(word) |> 
+  summarize(fam = median(familiarity)) |> 
+  slice_min(order_by = fam)
+```
+
+###### Among the 118 participants under the age of 20, 'boo', 'feel me', 'hella', and 'off the hook' are the most commonly known phrases. Of the 64 words in total, 54 of them had a median familiarity score of '1'. I'm personally suprised 'make it rain' and 'chedda' weren't at the top as well, those are pretty old phrases, especially cheddar equaling money.
+
+#### Non-White women familiarity
+
+```{r}
+#| output: false
+# # NWW <- hop |> 
+#   filter(ethnic_dicot == 'non-white') |>
+#   filter(sex == 'Female')
+# unique(NWW$subj)
+# 
+# hop |> 
+#   filter(ethnic_dicot == 'non-white') |>
+#   filter(sex == 'Female') |> 
+#   select(word, familiarity) |> 
+#   group_by(word) |> 
+#   summarize(fam = median(familiarity)) |> 
+#   slice_max(order_by = fam)
+# 
+# hop |> 
+#   filter(ethnic_dicot == 'non-white') |>
+#   filter(sex == 'Female') |> 
+#   select(word, familiarity) |> 
+#   group_by(word) |> 
+#   summarize(fam = median(familiarity)) |> 
+#   slice_min(order_by = fam)
+
+
+#Revised code:
+NWW <- hop |> 
+  filter(ethnic_dicot == 'non-white',
+         sex == 'Female') |> 
+  distinct(subj)
+
+
+hop |> 
+  filter(ethnic_dicot == 'non-white',
+         sex == 'Female') |> 
+  select(word, familiarity) |> 
+  group_by(word) |> 
+  summarize(
+    fam = median(familiarity)) |> 
+  slice_max(order_by = fam)
+
+hop |> 
+  filter(ethnic_dicot == 'non-white',
+         sex == 'Female') |> 
+  select(word, familiarity) |> 
+  group_by(word) |> 
+  summarize(fam = median(familiarity)) |> 
+  slice_min(order_by = fam)
+```
+
+###### Of the 26 participants who are non-white and female, 'boo', 'feel me', and 'off the hook', were again top phrases.
+
+#### White Men above 30 Familiarity
+
+```{r}
+#| output: false
+# W.M.30 <- hop |> 
+#   filter(ethnic_dicot == 'white') |>
+#   filter(sex == 'Male') |> 
+#   filter(age > 30)
+# unique(W.M.30$subj)
+# 
+# hop |> 
+#   filter(ethnic_dicot == 'white') |>
+#   filter(sex == 'Male') |> 
+#   filter(age > 30) |>  
+#   select(word, familiarity) |> 
+#   group_by(word) |> 
+#   summarize(fam = median(familiarity)) |> 
+#   slice_max(order_by = fam)
+
+
+#Revised code:
+W.M.30 <- hop |> 
+  filter(ethnic_dicot == 'white',
+         sex == 'Male',
+         age > 30) |> 
+  distinct(subj)
+
+hop |> 
+  filter(ethnic_dicot == 'white',
+         sex == 'Male',
+         age > 30) |>  
+  select(word, familiarity) |> 
+  group_by(word) |> 
+  summarize(fam = median(familiarity)) |> 
+  slice_max(order_by = fam)
+```
+
+###### Of the 5 white men over the age of 30, they were most familiar with 'off the hook', and 'feel me'. That is where the commonalities end, the other more familiar ones are '5-0', 'A-town', and 'hard'. A brief moment looking up the history of the term '5.0' is another reminder of my privilege of the conditions of my birth.
+
+#### Filtering Bieber
+
+```{r}
+#| output: false
+# hop |> 
+#   filter(ethnic_dicot == 'white') |> 
+#   filter(sex == 'Male') |> 
+#   filter(age >= 17) |> 
+#   filter(age <= 23) |> 
+#   filter(city >= 10000) |> 
+#   filter(city <= 60000) |> 
+#   filter(bieber == 5)
+
+
+#Revised code:
+hop |> 
+  filter(ethnic_dicot == 'white',
+         sex == 'Male',
+         age >= 17,
+         age <= 23,
+         city >= 10000,
+         city <= 60000) |> 
+  slice_max(bieber) |> 
+  distinct(subj)
+```
+
+###### My guess is that 'The Biebs' is participant 'p17', though I was surprised that I had to lower the bieber filter to a score of 5 instead of 6...
