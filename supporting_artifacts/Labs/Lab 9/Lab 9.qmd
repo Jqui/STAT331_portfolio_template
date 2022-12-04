@@ -1,0 +1,171 @@
+---
+title: "Lab 9: Bab"
+author: "Cameron White"
+format: 
+  html:
+    code-fold: true
+    code-summary: "show code"
+editor: visual
+execute: 
+  output: false
+---
+
+#### Setup
+
+```{r}
+library(tidyverse)
+
+
+bab_F_A <- read_csv(
+  here::here(
+    "supporting_artifacts", "Labs", "Lab 9", "StateNames_A.csv")) |> 
+  rename(
+    "Sex" = "Gender") |> 
+  filter(
+    Sex == 'F')
+
+```
+
+#### Step 3: Time-Series Visualization. Allisons Across Eons
+
+```{r}
+alli_sum <- bab_F_A |>
+  filter(
+    Name == 'Allison') |> 
+  group_by(
+    Year, Name) |> 
+  summarise(
+    Count = sum(Count))
+
+
+alli_sum |> 
+  ggplot(mapping = aes(
+    x = Year,
+    y = Count)) +
+  geom_line(
+    color = "tomato",
+    size = 0.9) +
+  geom_point(
+    color = "darkblue"
+  ) +
+  labs(
+    x = "",
+    y = "") +
+  ggtitle("United States: # of female children born named Allison (1997-2014)") + 
+  theme(plot.title.position = "plot") +
+  scale_y_continuous(
+    breaks = seq(5500, 7500, 1000)) +
+  scale_x_continuous(
+    breaks = seq(1994, 2016, 4))
+
+```
+
+#### Step 4: Modeling the Number of Allisons
+
+###### Linear Model: Allison by Year function
+
+```{r}
+# Calculate the linear model
+lm_alli_sum <- alli_sum |> 
+  lm(
+    Count ~ Year, 
+    data = _)
+
+# Visualize the linear model
+alli_sum |> 
+  ggplot(mapping = aes(
+    x = Year,
+    y = Count)) +
+  geom_line(
+    color = "tomato",
+    size = 0.9) +
+  geom_point(
+    color = "darkblue"
+  ) +
+  labs(
+    x = "",
+    y = "") +
+  ggtitle(
+    "United States: # of female children born named Allison (1997-2014)") + 
+  theme(plot.title.position = "plot") +
+  scale_y_continuous(
+    breaks = seq(5500, 7500, 1000)) +
+  scale_x_continuous(
+    breaks = seq(1994, 2016, 4)) +
+  geom_smooth(
+    method = "lm",
+    se = F)
+  
+```
+
+###### The linear model regression equation is:
+
+###### *y = 209689 - (101.5 /* x)\*
+
+#### Linear Model: Plotting the Residuals
+
+```{r}
+broom::augment(lm_alli_sum) |> 
+  ggplot(mapping = aes(
+    x = .fitted,
+    y = .resid
+  )) +
+  geom_point() +
+  geom_smooth(se = F)
+
+```
+
+###### There are too few values to make a reasonable assumption about the data. But if I were forced to, it seems that the model overestimates values between \~6000 and and \~6700. There are a few other values that are far underestimated by the linear model, but they don't seem to be part of a larger pattern.
+
+###### I conclude from the model that the name "Allison" is in somewhat severe decline, though counts refuse to go below \~5500 Allisons per year. From its high in 1998, it has declined in popularity by about 25%. It is difficult to say if the name "Allison" is truly lame-o without a fuller examination of counts against other names.
+
+######But, according to this analysis, it is not as attractive to parents as it once was. An important follow-up question may be: "Are we using an appropriate metric for 'cool'?"
+
+#### Part 5: Spelling by State
+
+#### Allan-metry
+
+```{r}
+bab_M_A <- read_csv(
+  here::here(
+    "Labs", "Lab 9", "StateNames_A.csv")) |> 
+  rename(
+    "Sex" = "Gender") |>
+  filter(
+    Sex == 'M',
+    Name == "Allan" | 
+    Name == "Alan" | 
+    Name == "Allen")
+
+unique(bab_M_A$Name)
+```
+
+#### Allan-patric Inspection
+
+```{r}
+# Filter and Pivot
+a <- bab_M_A |> 
+  filter(
+    Year == 2000,
+    State == 'CA'|
+    State == 'PA') |> 
+  pivot_wider(
+    names_from = Name,
+    values_from = Count)
+  select(
+    Alan:Allan)
+  
+  |>
+  apply(1, FUN = sum) |> 
+    cbind
+  
+?apply
+  
+a <- a |>
+  filter(State == 'CA') |> 
+  mutate("Alan_pct" = (Alan/(sum(Alan, Allen, Allan))))
+ 
+a <- a |> 
+  mutate("Alan_pct" = (Alan/(sum(Alan, Allen, Allan))))
+ 
+```
