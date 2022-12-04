@@ -3,3 +3,23 @@ title: "Lightening Round Essays"
 format: html
 editor: visual
 ---
+
+-   "If \[Student\] doesn\'t earn an A, then nobody should, because...\" Explain your choice and your reasoning.
+
+    If Bobby-Jo Marigold doesn't earn an A, then nobody should, because...this is a false statement in my opinion. Just because one student doesn't earn an A doesn't mean it isn't possible for others.
+
+-   What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
+
+The most difficult part of the class for me was the lack of partial credit when completing assignments. I understand given the structure of the class and your grading, but I found it very defeating some weeks to get an incomplete. I'm not sure how this would be rectified better than your current system of re-submissions.
+
+-   What was the easiest part of the class for you? Explain why.
+
+Easiest part of the class would probably be the online video lecture+reading+in-class lecture combination, I think it's a really great system you've put together to get the class ready for topics each week.
+
+-   What part of the class surprised or interested you the most? Explain why.
+
+I was surprised how fun it was to create custom functions, that really allows for creativity. Another source of creativity is the ggplot, that seems like a near-bottomless pit of choices and is a lot of fun. I come from a GIS background, so creating visualizations that are effective at communicating information is an interest of mine.
+
+-   Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+
+Don't let perfect be the enemy of good, just keep the train running. Watching and reading the prep material before class helps loads. Don't be afraid to ask for help.
