@@ -128,7 +128,7 @@ broom::augment(lm_alli_sum) |>
 ```{r}
 bab_M_A <- read_csv(
   here::here(
-    "Labs", "Lab 9", "StateNames_A.csv")) |> 
+    "supporting_artifacts", "Labs", "Lab 9", "StateNames_A.csv")) |> 
   rename(
     "Sex" = "Gender") |>
   filter(
@@ -143,29 +143,29 @@ unique(bab_M_A$Name)
 #### Allan-patric Inspection
 
 ```{r}
-# Filter and Pivot
-a <- bab_M_A |> 
-  filter(
-    Year == 2000,
-    State == 'CA'|
-    State == 'PA') |> 
-  pivot_wider(
-    names_from = Name,
-    values_from = Count)
-  select(
-    Alan:Allan)
-  
-  |>
-  apply(1, FUN = sum) |> 
-    cbind
-  
-?apply
-  
-a <- a |>
-  filter(State == 'CA') |> 
-  mutate("Alan_pct" = (Alan/(sum(Alan, Allen, Allan))))
- 
-a <- a |> 
-  mutate("Alan_pct" = (Alan/(sum(Alan, Allen, Allan))))
- 
+# # Filter and Pivot
+# a <- bab_M_A |> 
+#   filter(
+#     Year == 2000,
+#     State == 'CA'|
+#     State == 'PA') |> 
+#   pivot_wider(
+#     names_from = Name,
+#     values_from = Count)
+#   select(
+#     Alan:Allan)
+#   
+#   |>
+#   apply(1, FUN = sum) |> 
+#     cbind
+#   
+# ?apply
+#   
+# a <- a |>
+#   filter(State == 'CA') |> 
+#   mutate("Alan_pct" = (Alan/(sum(Alan, Allen, Allan))))
+#  
+# a <- a |> 
+#   mutate("Alan_pct" = (Alan/(sum(Alan, Allen, Allan))))
+#  
 ```
