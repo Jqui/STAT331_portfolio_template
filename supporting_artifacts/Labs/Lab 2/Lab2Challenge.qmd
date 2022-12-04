@@ -2,7 +2,8 @@
 title: "Lab2Challenge"
 author: "Cameron White"
 format:
-  html: 
+  html:
+    self-contained: true
     code-fold: true
     code-summary: "show code"
 editor: visual
