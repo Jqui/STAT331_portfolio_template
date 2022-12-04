@@ -1,0 +1,234 @@
+---
+title: "Lab 7"
+author: "Cameron White"
+format: 
+  html:
+    self-contained: true
+    code-fold: true
+    code-summary: "show code"
+editor: visual
+warning: false
+---
+
+#### Setup
+
+```{r}
+#| output: false
+library(tidyverse)
+
+
+fish <- read_csv(
+  here::here(
+    "supporting_artifacts", "Labs", "Lab 7", "BlackfootFish.csv")
+)
+```
+
+### <u> Part 1: Summaries and Plots </u>
+
+#### Task 1: Summarizing Missing Data
+
+```{r}
+fish |> 
+  summarize(
+    across(
+      everything(), 
+      .fns = ~sum(is.na(.))))
+```
+
+#### Task 2: Visualizing Misisng Data. Setup
+
+```{r}
+#much simpler without the pivot, probably don't even need the functions but it does help make the ggplot code easier to read. 
+
+fish_view <- fish |> 
+  group_by(
+    year, 
+    trip, 
+    section) |> 
+  summarize(
+    NA_WeightRecords = 
+      sum(is.na(weight))) |> 
+  rename(
+    "Trip" = "trip") |> 
+  mutate(
+    Trip = as.character(Trip))
+
+  
+fishline <- function(){ 
+  
+  geom_line(
+    size = 1,
+    mapping = aes(
+      x = year,
+      y = NA_WeightRecords,
+      color = section,
+      linetype = Trip))
+}
+
+fishpoint <- function(){ 
+  
+  geom_point(
+    color = "black", 
+    mapping = aes(
+      x = year,
+      y = NA_WeightRecords))
+}
+```
+
+#### Plotting
+
+```{r}
+fish_view |> 
+  ggplot() +
+  fishline() +
+  fishpoint() +
+  labs(
+    x = "Year",
+    y = "") +
+  guides(
+    color = guide_legend(
+      title = "Section"))+
+  ggtitle(
+    "# of missing weight observations") +
+  theme(
+    plot.title.position = "plot")
+```
+
+### <u> Part 2: Adjusting the Data (Function Writing) </u>
+
+#### Task 3: Writing a Function
+
+```{r}
+rescale_01 <- function(var){
+
+  stopifnot(is.numeric(var))
+  stopifnot(length(var) > 1)
+
+  num <-  
+    var - min(var, na.rm = TRUE) 
+  denom <- 
+    max(var, na.rm = TRUE) - 
+    min(var, na.rm = T)
+
+return(num/denom)
+}
+
+# More efficient version
+rescale_01 <- function(var){
+  
+  stopifnot(is.numeric(var))
+  stopifnot(length(var) > 1)
+  
+  range <- range(var, na.rm = T)
+  
+  num <- var - range[1]
+  denom <- range[2] - range[1]
+  
+  return(num / denom)
+}
+
+x <- c(1:25, NA)
+rescale_01(x)
+```
+
+#### Task 4: Performing a More Difficult Test
+
+```{r}
+#| layout: [[50, 50], [100]]
+
+fish_length <- c(fish$length)
+fish_length_rescale <- rescale_01(fish_length)
+
+#To match binwidth between plots
+rnge <- c(range(fish_length))
+bin <- 30 / (rnge[2] - rnge[1])
+
+
+ggplot(mapping = aes(fish_length)) +
+  geom_histogram(
+    fill = "lightblue", 
+    color = "blue", 
+    binwidth = 30) +
+  labs(x = "Length(mm)",
+       y = "Count")
+
+
+ggplot(mapping = aes(fish_length_rescale)) +
+  geom_histogram(
+    fill = "lightblue", 
+    color = "blue", 
+    binwidth = bin) +
+  labs(
+    x = "Length(scaled)",
+    y = "Count")
+```
+
+###### I'm not 100% sure why the graphs aren't identical. My thought is that it's because the length(mm) histogram doesn't start until 16mm, while the length(rescale) histogram starts at 0.00, meaning that even if the binwidths are mathematically rescaled to be the same the visualization looks only similar instead of identical.
+
+#### Task 5: Incorporating Variables
+
+```{r}
+#| layout: [[50, 50], [100]]
+
+rescale_column <- function(data, variables){
+
+  stopifnot(is.data.frame(data))
+  
+  data |> 
+    mutate(
+      across(
+        .cols = {{ variables }},
+        .fns = rescale_01
+      )
+    )
+}
+
+fish_rescale <- fish |> 
+  rescale_column(length:weight)
+
+# To check columns to see if they rescaled properly
+
+fish_rescale |> 
+  select(length:weight) |> 
+  map(range, na.rm = T)
+
+
+```
+
+#### Task 5.1: Proof that the rescale function worked, Setup
+
+```{r}
+nothings_fishy <- function(data, variable, rescale = F) {
+  
+   
+  ggplot(mapping = aes(
+  x = 
+    data[[ variable ]])) +
+  geom_density() +
+    labs(
+      x = str_to_title(variable), 
+      y = "") +
+    ggtitle(paste0(
+      "Distrbution of Blackfoot River fish: ", 
+      str_to_title(variable), 
+      if(rescale == T){
+        " (rescaled)"})) +
+    theme(
+      plot.title.position = "plot" )
+  
+}
+
+# I couldn't figure out how to use the 'variable' argument in multiple places as
+# both string as well as the dataframe variable. So I opted for non-tidy syntax. 
+
+```
+
+#### Proof that the rescale function worked, Visualization
+
+```{r}
+#| layout-ncol: 2
+nothings_fishy(fish, "length")
+nothings_fishy(fish_rescale, "length", T)
+nothings_fishy(fish, "weight")
+nothings_fishy(fish_rescale, "weight", T)
+```
