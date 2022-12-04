@@ -1,7 +1,9 @@
 ---
 title: "Lab 4 Challenge"
 author: "Cameron White"
-format: html
+format: 
+  html:
+    self-contained: true
 editor: visual
 ---
 
