@@ -3,6 +3,7 @@ title: "Lab 9: Bab"
 author: "Cameron White"
 format: 
   html:
+    self-contained: true
     code-fold: true
     code-summary: "show code"
 editor: visual
