@@ -272,7 +272,6 @@ mean_hass_con$proportion <-
 #### Exercise #7 Plotting
 
 ```{r}
-#| layout: [50:50]
 
 mean_hass_org |> 
 ggplot(mapping = aes(
