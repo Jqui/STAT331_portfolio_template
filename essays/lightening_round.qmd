@@ -4,7 +4,7 @@ format: html
 editor: visual
 ---
 
--   "If \[Student\] doesn\'t earn an A, then nobody should, because...\" Explain your choice and your reasoning.
+-   "If \[Student\] doesn't earn an A, then nobody should, because..." Explain your choice and your reasoning.
 
     If Bobby-Jo Marigold doesn't earn an A, then nobody should, because...this is a false statement in my opinion. Just because one student doesn't earn an A doesn't mean it isn't possible for others.
 
