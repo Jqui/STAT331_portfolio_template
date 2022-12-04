@@ -350,7 +350,7 @@ hop |>
 
 ###### Of the 5 white men over the age of 30, they were most familiar with 'off the hook', and 'feel me'. That is where the commonalities end, the other more familiar ones are '5-0', 'A-town', and 'hard'. A brief moment looking up the history of the term '5.0' is another reminder of my privilege of the conditions of my birth.
 
-#### Filtering Bieber
+#### Task: Filtering Bieber
 
 ```{r}
 #| output: false

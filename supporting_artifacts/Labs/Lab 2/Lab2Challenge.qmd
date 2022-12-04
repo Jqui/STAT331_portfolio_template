@@ -78,7 +78,7 @@ plot <- surveys %>%
   )
 ```
 
-#### Adding annotations to plot
+#### Task 1: Adding annotations to plot
 
 ```{r}
 for (i in seq_along(gen)){
